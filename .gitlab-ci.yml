@@ -18,12 +18,16 @@ prepare:
   script:
     - docker-compose up -d
     - docker-compose exec web python manage.py migrate
+  tags:
+    - docker
 
 test:
   stage: test
   script:
     - docker-compose run web pytest
     - docker-compose down
+  tags:
+    - docker
 
 build:
   stage: build
@@ -32,6 +36,8 @@ build:
   artifacts:
     paths:
       - docker-compose.yml
+  tags:
+    - docker
 
 deploy:
   stage: deploy
@@ -40,3 +46,5 @@ deploy:
     # Здесь можно добавить команды для развертывания на вашем сервере
     - docker-compose up -d
     - docker-compose down
+  tags:
+    - docker
