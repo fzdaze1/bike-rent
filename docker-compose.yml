@@ -1,5 +1,4 @@
-name: bike-rent
-
+version: '3.8'
 services:
   web:
     build: ./app
