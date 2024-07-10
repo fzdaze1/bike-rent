@@ -4,7 +4,7 @@ from pytils.translit import slugify
 
 def unique_slugify(instance, slug, slug_field):
     '''
-    Generate unique slug for rental.models Bikes =)
+    Generate unique slug for rental.models Bikes
     '''
     model = instance.__class__
     unique_slug = slug_field
