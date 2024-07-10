@@ -3,38 +3,58 @@ stages:
   - test
   - release
 
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+
 Docker Build:
   stage: build
   image: docker:stable
   services:
     - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
   script:
-    - docker login -u gitlab-ci-token -p %{CI_JOB_TOKEN} ${CI_REGISTRY}
-    - docker compose build %{CI_REGISTRY}/${CI_PROJECT_PATH}/${CI_PROJECT_NAME}:${CI_COMMIT_REF_SLUG}
-    - docker push ${CI_REGISTRY}/${CI_PROJECT_PATH}/${CI_PROJECT_NAME}:${CI_COMMIT_REF_SLUG}
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker-compose -f docker-compose.yml build
+    - docker tag $CI_PROJECT_PATH:$CI_COMMIT_REF_SLUG $CI_REGISTRY/$CI_PROJECT_PATH/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG
+    - docker push $CI_REGISTRY/$CI_PROJECT_PATH/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG
   tags:
     - docker
 
 Django Tests:
   stage: test
   image: python:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_TLS_CERTDIR: ""
   script:
     - pip install -r app/requirements.txt
-    - docker compose -f docker-compose.yml up -d
-    - docker compose exec web python manage.py migrate
-    - docker compose exec web python -m pytest
+    - docker-compose -f docker-compose.yml up -d
+    - docker-compose exec web python manage.py migrate
+    - docker-compose exec web python -m pytest
+    - docker-compose down
   tags:
     - docker
+  dependencies:
+    - Docker Build
 
 Release:
   stage: release
   image: docker:stable
   services:
     - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_TLS_CERTDIR: ""
   script:
-    - docker login -u gitlab-ci-token -p %{CI_JOB_TOKEN} ${CI_REGISTRY}
-    - docker pull ${CI_REGISTRY}/${CI_PROJECT_PATH}/${CI_PROJECT_NAME}:${CI_COMMIT_REF_SLUG}
-    - docker tag ${CI_REGISTRY}/${CI_PROJECT_PATH}/${CI_PROJECT_NAME}:${CI_COMMIT_REF_SLUG} ${CI_REGISTRY}/${CI_PROJECT_PATH}/${CI_PROJECT_NAME}:latest
-    - docker push ${CI_REGISTRY}/${CI_PROJECT_PATH}/${CI_PROJECT_NAME}:latest
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker pull $CI_REGISTRY/$CI_PROJECT_PATH/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG
+    - docker tag $CI_REGISTRY/$CI_PROJECT_PATH/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG $CI_REGISTRY/$CI_PROJECT_PATH/$CI_PROJECT_NAME:latest
+    - docker push $CI_REGISTRY/$CI_PROJECT_PATH/$CI_PROJECT_NAME:latest
   tags:
     - docker
+  dependencies:
+    - Django Tests
