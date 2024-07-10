@@ -14,10 +14,6 @@ services:
       - postgres-data:/var/lib/postgresql/data
     env_file:
       - $env
-    environment:
-      - POSTGRES_USER=${SQL_USER}
-      - POSTGRES_PASSWORD=${SQL_PASSWORD}
-      - POSTGRES_DB=${SQL_DATABASE}
 
   redis:
     image: redis
