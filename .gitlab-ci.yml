@@ -24,11 +24,15 @@ prepare:
   script:
     - docker-compose -f docker-compose.yml up -d
     - docker-compose -f docker-compose.yml exec web python manage.py migrate
+  tags:
+    - docker
 
 test:
   stage: test
   script:
     - docker-compose -f docker-compose.yml run web pytest
+  tags:
+    - docker
 
 build:
   stage: build
@@ -37,11 +41,15 @@ build:
   artifacts:
     paths:
       - docker-compose.yml
+  tags:
+    - docker
 
 cleanup:
   stage: cleanup
   script:
     - docker-compose -f docker-compose.yml down
+  tags:
+    - docker
 
 deploy:
   stage: deploy
@@ -51,3 +59,5 @@ deploy:
     - docker-compose -f docker-compose.yml up -d
   only:
     - master
+  tags:
+    - docker
