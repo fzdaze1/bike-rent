@@ -20,7 +20,7 @@ before_script:
   - docker info
   - printenv
 
-prepare:
+test:
   stage: prepare
   script:
     - echo "Creating .env file from GitLab CI/CD variables"
@@ -38,40 +38,36 @@ prepare:
     - echo "CELERY_BROKER_URL=${CELERY_BROKER_URL}" >> .env
     - docker-compose -f docker-compose.yml up -d --build
     - docker-compose -f docker-compose.yml exec web python manage.py migrate
-  tags:
-    - docker
-
-test:
-  stage: test
-  script:
     - docker-compose -f docker-compose.yml run web pytest
-  tags:
-    - docker
-
-build:
-  stage: build
-  script:
-    - docker-compose -f docker-compose.yml build
-  artifacts:
-    paths:
-      - docker-compose.yml
-  tags:
-    - docker
-
-cleanup:
-  stage: cleanup
-  script:
     - docker-compose -f docker-compose.yml down
   tags:
     - docker
 
-deploy:
-  stage: deploy
-  script:
-    - echo "Deploying to production server"
-    # Добавьте здесь команды для развертывания на вашем сервере
-    - docker-compose -f docker-compose.yml up -d
-  only:
-    - master
-  tags:
-    - docker
+
+# build:
+#   stage: build
+#   script:
+#     - docker-compose -f docker-compose.yml build
+#   artifacts:
+#     paths:
+#       - docker-compose.yml
+#   tags:
+#     - docker
+
+# cleanup:
+#   stage: cleanup
+#   script:
+#     - docker-compose -f docker-compose.yml down
+#   tags:
+#     - docker
+
+# deploy:
+#   stage: deploy
+#   script:
+#     - echo "Deploying to production server"
+#     # Добавьте здесь команды для развертывания на вашем сервере
+#     - docker-compose -f docker-compose.yml up -d
+#   only:
+#     - master
+#   tags:
+#     - docker
