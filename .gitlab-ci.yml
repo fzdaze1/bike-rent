@@ -21,7 +21,7 @@ build:
     - docker
     - python
   script:
-    - docker-compose -f docker-compose.yml build
+    - docker-compose -f docker-compose.yml build -t $CI_REGISTRY_IMAGE
     - docker-compose -f docker-compose.yml exec web python manage.py migrate
 
 test:
@@ -44,6 +44,6 @@ deploy:
   only:
     - master
   script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD https://gitlab.com/me7000428/bike-rent-tz
     - docker tag bike-rent-tz %CI_REGISTRY_IMAGE
     - docker push %CI_REGISTRY_IMAGE
