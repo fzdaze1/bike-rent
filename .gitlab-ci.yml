@@ -23,7 +23,6 @@ build:
     - docker
     - python
   script:
-    - pip install -r requirements.txt
     - docker-compose -f docker-compose.yml build -t $CI_REGISTRY_IMAGE
     - docker-compose -f docker-compose.yml exec web python manage.py migrate
 
