@@ -26,6 +26,8 @@ pytest:
     - docker-compose down # останавливаем тестовую среду после выполнения тестов
   services:
     - docker:19.03.12-dind # указываем версию сервиса docker:dind
+  tags:
+    - docker
 
 deploy:
   stage: deploy
@@ -34,4 +36,5 @@ deploy:
     - docker-compose down # останавливаем приложение после его развертывания
   services:
     - docker:19.03.12-dind # указываем версию сервиса docker:dind
-
+  tags:
+    - docker
