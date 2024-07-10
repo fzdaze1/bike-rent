@@ -5,9 +5,9 @@ stages:
 
 Django Tests:
   stage: test
-  image: python: 3.12
+  image: python:latest
   script:
-    - pip install -r requirements.txt
+    - pip install -r app/requirements.txt
     - python -m pytest --noinput
   tags:
     - docker
