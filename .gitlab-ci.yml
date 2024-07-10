@@ -2,6 +2,7 @@ stages:
   - prepare
   - test
   - build
+  - cleanup
   - deploy
 
 variables:
