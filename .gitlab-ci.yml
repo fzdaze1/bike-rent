@@ -1,8 +1,6 @@
 stages:
-  - prepare
   - test
   - build
-  - cleanup
   - deploy
 
 variables:
@@ -43,31 +41,25 @@ test:
   tags:
     - docker
 
+build:
+  stage: build
+  script:
+    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
+    - docker build -t ${CI_REGISTRY}/${CI_PROJECT_PATH}/${CI_PROJECT_NAME}:${CI_COMMIT_REF_SLUG} . 
+    - docker push ${CI_REGISTRY}/${CI_PROJECT_PATH}/${CI_PROJECT_NAME}:${CI_COMMIT_REF_CLUG}
+  tags:
+    - docker
 
-# build:
-#   stage: build
-#   script:
-#     - docker-compose -f docker-compose.yml build
-#   artifacts:
-#     paths:
-#       - docker-compose.yml
-#   tags:
-#     - docker
+deploy:
+  stage: deploy
+  script:
+    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
+    - docker pull ${CI_REGISTRY}/${CI_PROJECT_PATH}/${CI_PROJECT_NAME}:${CI_COMMIT_REF_CLUG}
+    - docker tag ${CI_REGISTRY}/${CI_PROJECT_PATH}/%{CI_PROJECT_NAME}:%{CI_COMMIT_REF_SLUG} ${CI_REGISTRY}/%{CI_PROJECT_PATH}/${CI_PROJECT_NAME}:latest
+    - docker push ${CI_REGISTRY}/${CI_PROJECT_PATH}/${CI_PROJECT_NAME}:latest
+  when:
+    - manual
+  tags:
+    - docker
 
-# cleanup:
-#   stage: cleanup
-#   script:
-#     - docker-compose -f docker-compose.yml down
-#   tags:
-#     - docker
 
-# deploy:
-#   stage: deploy
-#   script:
-#     - echo "Deploying to production server"
-#     # Добавьте здесь команды для развертывания на вашем сервере
-#     - docker-compose -f docker-compose.yml up -d
-#   only:
-#     - master
-#   tags:
-#     - docker
