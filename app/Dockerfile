@@ -9,7 +9,8 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 # install dependencies
-RUN pip install --upgrade pip 
+RUN apk add --no-cache gcc musl-dev libffi-dev openssl-dev python3-dev py3-pip make automake g++ subversion
+RUN pip install --upgrade pip cython
 COPY ./requirements.txt /usr/src/app
 RUN pip install -r requirements.txt
 
