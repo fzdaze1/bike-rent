@@ -8,6 +8,6 @@ Django Tests:
   image: python:latest
   script:
     - pip install -r app/requirements.txt
-    - python -m pytest --noinput
+    - python -m pytest
   tags:
     - docker
