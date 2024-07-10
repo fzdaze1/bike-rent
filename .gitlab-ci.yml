@@ -24,18 +24,18 @@ prepare:
   stage: prepare
   script:
     - echo "Creating .env file from GitLab CI/CD variables"
-    - echo "SECRET_KEY=$SECRET_KEY" > .env
-    - echo "DEBUG=$DEBUG" >> .env
-    - echo "DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS" >> .env
-    - echo "SQL_ENGINE=$SQL_ENGINE" >> .env
-    - echo "SQL_DATABASE=$SQL_DATABASE" >> .env
-    - echo "SQL_USER=$SQL_USER" >> .env
-    - echo "SQL_PASSWORD=$SQL_PASSWORD" >> .env
-    - echo "SQL_HOST=$SQL_HOST" >> .env
-    - echo "SQL_PORT=$SQL_PORT" >> .env
-    - echo "REDIS_HOST=$REDIS_HOST" >> .env
-    - echo "REDIS_PORT=$REDIS_PORT" >> .env
-    - echo "CELERY_BROKER_URL=$CELERY_BROKER_URL" >> .env
+    - echo "SECRET_KEY=${SECRET_KEY}" > .env
+    - echo "DEBUG=${DEBUG}" >> .env
+    - echo "DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}" >> .env
+    - echo "SQL_ENGINE=${SQL_ENGINE}" >> .env
+    - echo "SQL_DATABASE=${SQL_DATABASE}" >> .env
+    - echo "SQL_USER=${SQL_USER}" >> .env
+    - echo "SQL_PASSWORD=${SQL_PASSWORD}" >> .env
+    - echo "SQL_HOST=${SQL_HOST}" >> .env
+    - echo "SQL_PORT=${SQL_PORT}" >> .env
+    - echo "REDIS_HOST=${REDIS_HOST}" >> .env
+    - echo "REDIS_PORT=${REDIS_PORT}" >> .env
+    - echo "CELERY_BROKER_URL=${CELERY_BROKER_URL}" >> .env
     - docker-compose -f docker-compose.yml up -d --build
     - docker-compose -f docker-compose.yml exec web python manage.py migrate
   tags:
