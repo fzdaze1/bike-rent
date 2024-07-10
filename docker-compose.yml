@@ -5,7 +5,7 @@ services:
     ports:
       - 127.0.0.1:8000:8000
     env_file:
-      - $env
+      - $$env
     depends_on:
       - db
   
@@ -14,13 +14,13 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     env_file:
-      - $env
+      - $$env
     environment:
-      - POSTGRES_USER=${SQL_USER}
-      - POSTGRES_PASSWORD=${SQL_PASSWORD}
-      - POSTGRES_DB=${SQL_DATABASE}
+      - POSTGRES_USER=$${SQL_USER}
+      - POSTGRES_PASSWORD=$${SQL_PASSWORD}
+      - POSTGRES_DB=$${SQL_DATABASE}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U $${DATABASE_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -32,14 +32,14 @@ services:
     volumes:
       - redis-data:/data
     env_file:
-      - $env
+      - $$env
 
   celery:
     image: celery
     build: ./app
     command: celery -A rental worker -l info
     env_file:
-      - $env
+      - $$env
     volumes:
       - ./app:/app
     depends_on:
