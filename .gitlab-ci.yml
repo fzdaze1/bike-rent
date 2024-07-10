@@ -19,7 +19,14 @@ Docker Build:
     - name: docker:20.10.8-dind
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - apk add --no-cache py-pip python3-dev libffi-dev openssl-dev gcc libc-dev rust cargo make
+    - apk add --no-cache py-pip python3-dev libffi-dev openssl-dev gcc libc-dev
+    - curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    - export PATH="$HOME/.cargo/bin:$PATH"
+    - rustup install stable # Install stable Rust toolchain
+    - rustup default stable # Set the default toolchain to stable
+    - rustup update # Update Rust and Cargo
+    - cargo --version # Check Cargo version
+    - rustc --version # Check Rust version
     - pip install docker-compose
     - docker-compose build
     - docker tag $CI_PROJECT_PATH:$CI_COMMIT_REF_SLUG $CI_REGISTRY/$CI_PROJECT_PATH/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG
