@@ -22,8 +22,8 @@ Docker Build:
     - apk add --no-cache py-pip python3-dev libffi-dev openssl-dev gcc libc-dev
     - rm -rf $HOME/.cache/pip /tmp/pip-build-*
     - pip install --upgrade setuptools pip
-    - pip install docker-compose
-    - pip install --upgrade docker-compose
+    - pip install --use-pep517 docker-compose
+    - pip install --upgrade docker-compose --use-pep517
     - docker-compose build
     - docker tag $CI_PROJECT_PATH:$CI_COMMIT_REF_SLUG $CI_REGISTRY/$CI_PROJECT_PATH/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG
     - docker push $CI_REGISTRY/$CI_PROJECT_PATH/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG
@@ -37,7 +37,8 @@ Django Tests:
     - name: docker:dind
   script:
     - rm -rf $HOME/.cache/pip /tmp/pip-build-*
-    - pip install -r app/requirements.txt
+    - pip install -r app/requirements.txt --use-pep517
+    - pip install docker-compose --use-pep517
     - docker-compose up -d
     - docker-compose exec web python manage.py migrate
     - docker-compose exec web python -m pytest
