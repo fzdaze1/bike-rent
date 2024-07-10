@@ -1,40 +1,63 @@
-# .gitlab-ci.yml
-
-# Используем Docker executor
-image: docker:stable
-
-services:
-  - docker:dind # сервис для доступа к Docker-демону внутри CI
-
 stages:
+  - build
   - test
-  - deploy
+  - release
 
 variables:
-  DOCKER_HOST: tcp://docker:2375/ # адрес демона Docker, обслуживающего сервис docker:dind
   DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
 
-before_script:
-  - docker info
+services:
+  - name: docker:dind
+    alias: docker
+    command: ["--host=tcp://0.0.0.0:2375", "--host=unix:///var/run/docker.sock"]
 
-pytest:
+Docker Build:
+  stage: build
+  image: docker:stable
+  services:
+    - name: docker:dind
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - apk add --no-cache py-pip python3-dev libffi-dev openssl-dev gcc libc-dev
+    - rm -rf $HOME/.cache/pip /tmp/pip-build-*
+    - pip install --upgrade setuptools pip
+    - pip install docker-compose
+    - pip install --upgrade docker-compose
+    - docker-compose build
+    - docker tag $CI_PROJECT_PATH:$CI_COMMIT_REF_SLUG $CI_REGISTRY/$CI_PROJECT_PATH/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG
+    - docker push $CI_REGISTRY/$CI_PROJECT_PATH/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG
+  tags:
+    - docker
+
+Django Tests:
   stage: test
-  script:
-    - docker-compose up -d # запускаем тестовую среду с помощью Docker Compose
-    - docker-compose exec web python manage.py migrate --noinput # проводим миграции в тестовой базе данных
-    - docker-compose exec web pytest # запускаем тесты с pytest
-    - docker-compose down # останавливаем тестовую среду после выполнения тестов
+  image: python:latest
   services:
-    - docker:19.03.12-dind # указываем версию сервиса docker:dind
+    - name: docker:dind
+  script:
+    - rm -rf $HOME/.cache/pip /tmp/pip-build-*
+    - pip install -r app/requirements.txt
+    - docker-compose up -d
+    - docker-compose exec web python manage.py migrate
+    - docker-compose exec web python -m pytest
+    - docker-compose down
   tags:
     - docker
+  dependencies:
+    - Docker Build
 
-deploy:
-  stage: deploy
-  script:
-    - docker-compose up -d # развертываем приложение с помощью Docker Compose
-    - docker-compose down # останавливаем приложение после его развертывания
+Release:
+  stage: release
+  image: docker:stable
   services:
-    - docker:19.03.12-dind # указываем версию сервиса docker:dind
+    - name: docker:dind
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker pull $CI_REGISTRY/$CI_PROJECT_PATH/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG
+    - docker tag $CI_REGISTRY/$CI_PROJECT_PATH/$CI_PROJECT_NAME:$CI_COMMIT_REF_SLUG $CI_REGISTRY/$CI_PROJECT_PATH/$CI_PROJECT_NAME:latest
+    - docker push $CI_REGISTRY/$CI_PROJECT_PATH/$CI_PROJECT_NAME:latest
   tags:
     - docker
+  dependencies:
+    - Django Tests
