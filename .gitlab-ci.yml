@@ -1,9 +1,7 @@
 stages:
-  - prepare
   - test
   - build
-  - cleanup
-  - deploy
+  - release
 
 variables:
   DOCKER_DRIVER: overlay2
@@ -15,13 +13,11 @@ services:
 
 before_script:
   - apk add --no-cache docker-compose
-
-before_script:
   - docker info
   - printenv
 
 test:
-  stage: prepare
+  stage: test
   script:
     - echo "Creating .env file from GitLab CI/CD variables"
     - echo "SECRET_KEY=${SECRET_KEY}" > .env
@@ -43,31 +39,22 @@ test:
   tags:
     - docker
 
+build:
+  stage: build
+  script:
+    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
+    - docker build -t ${CI_REGISTRY}/${CI_PROJECT_PATH}/${CI_PROJECT_NAME}:${CI_COMMIT_REF_SLUG} .
+    - docker push ${CI_REGISTRY}/${CI_PROJECT_PATH}/${CI_PROJECT_NAME}:${CI_COMMIT_REF_SLUG}
+  tags:
+    - docker
 
-# build:
-#   stage: build
-#   script:
-#     - docker-compose -f docker-compose.yml build
-#   artifacts:
-#     paths:
-#       - docker-compose.yml
-#   tags:
-#     - docker
-
-# cleanup:
-#   stage: cleanup
-#   script:
-#     - docker-compose -f docker-compose.yml down
-#   tags:
-#     - docker
-
-# deploy:
-#   stage: deploy
-#   script:
-#     - echo "Deploying to production server"
-#     # Добавьте здесь команды для развертывания на вашем сервере
-#     - docker-compose -f docker-compose.yml up -d
-#   only:
-#     - master
-#   tags:
-#     - docker
+release:
+  stage: release
+  script:
+    - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
+    - docker pull ${CI_REGISTRY}/${CI_PROJECT_PATH}/${CI_PROJECT_NAME}:${CI_COMMIT_REF_SLUG}
+    - docker tag ${CI_REGISTRY}/${CI_PROJECT_PATH}/${CI_PROJECT_NAME}:${CI_COMMIT_REF_SLUG} ${CI_REGISTRY}/${CI_PROJECT_PATH}/${CI_PROJECT_NAME}:latest
+    - docker push ${CI_REGISTRY}/${CI_PROJECT_PATH}/${CI_PROJECT_NAME}:latest
+  when: manual # Когда задача выполняется вручную
+  tags:
+    - docker
