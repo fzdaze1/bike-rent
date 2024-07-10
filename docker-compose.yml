@@ -1,31 +1,41 @@
-image: docker:stable
-
 services:
-  - docker:dind  
+  web:
+    build: ./app
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - 127.0.0.1:8000:8000
+    env_file:
+      - $env
+  
+  db:
+    image: postgres:15
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    env_file:
+      - $env
 
-stages:
-  - test
-  - deploy
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - redis-data:/data
+    env_file:
+      - $env
 
-variables:
-  DOCKER_HOST: tcp://docker:2375/
-  DOCKER_DRIVER: overlay2
+  celery:
+    image: celery
+    build: ./app
+    command: celery -A rental worker -l info
+    env_file:
+      - $env
+    volumes:
+      - ./app:/app
+    depends_on:
+      - redis
+  
 
-before_script:
-  - docker info
-
-pytest:
-  stage: test
-  script:
-    - docker-compose up -d  # запускаем тестовую среду с помощью Docker Compose
-    - docker-compose exec web python manage.py migrate --noinput  # проводим миграции в тестовой базе данных
-    - docker-compose exec web python -m pytest  # запускаем тесты с pytest
-    - docker-compose down  # останавливаем тестовую среду после выполнения тестов
-  services:
-    - docker:19.03.12-dind  # указываем версию сервиса docker:dind
-
-deploy:
-  stage: deploy
-  script:
-    - docker-compose up -d  # развертываем приложение с помощью Docker Compose
-    - docker-compose down -d
+volumes:
+  redis-data:
+  celery-data:
+  postgres-data:
