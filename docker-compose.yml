@@ -1,0 +1,47 @@
+name: bike-rent
+
+services:
+  web:
+    build: ./app
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - 127.0.0.1:8000:8000
+    env_file:
+      - .env
+  
+  db:
+    image: postgres:15
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${SQL_USER}
+      - POSTGRES_PASSWORD=${SQL_PASSWORD}
+      - POSTGRES_DB=${SQL_DATABASE}
+
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - redis-data:/data
+    env_file:
+      - .env
+
+  celery:
+    image: celery
+    build: ./app
+    command: celery -A rental worker -l info
+    env_file:
+      - .env
+    volumes:
+      - ./app:/app
+    depends_on:
+      - redis
+  
+
+volumes:
+  redis-data:
+  celery-data:
+  postgres-data:
