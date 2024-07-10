@@ -5,7 +5,7 @@ services:
     ports:
       - 127.0.0.1:8000:8000
     env_file:
-      - .env
+      - $env
     depends_on:
       - db
   
@@ -14,7 +14,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     env_file:
-      - .env
+      - $env
     environment:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
@@ -27,14 +27,14 @@ services:
     volumes:
       - redis-data:/data
     env_file:
-      - .env
+      - $env
 
   celery:
     image: celery
     build: ./app
     command: celery -A rental worker -l info
     env_file:
-      - .env
+      - $env
     volumes:
       - ./app:/app
     depends_on:
