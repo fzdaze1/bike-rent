@@ -1,41 +1,43 @@
+stages:
+  - prepare
+  - test
+  - build
+  - deploy
+
+variables:
+  DOCKER_DRIVER: overlay2
+
 services:
-  web:
-    build: ./app
-    command: python manage.py runserver 0.0.0.0:8000
-    ports:
-      - 127.0.0.1:8000:8000
-    env_file:
-      - $env
-  
-  db:
-    image: postgres:15
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    env_file:
-      - $env
+  - docker:dind
 
-  redis:
-    image: redis
-    ports:
-      - 6379:6379
-    volumes:
-      - redis-data:/data
-    env_file:
-      - $env
+before_script:
+  - apk add --no-cache docker-compose
 
-  celery:
-    image: celery
-    build: ./app
-    command: celery -A rental worker -l info
-    env_file:
-      - $env
-    volumes:
-      - ./app:/app
-    depends_on:
-      - redis
-  
+prepare:
+  stage: prepare
+  script:
+    - docker-compose up -d
+    - docker-compose exec web python manage.py migrate
 
-volumes:
-  redis-data:
-  celery-data:
-  postgres-data:
+test:
+  stage: test
+  script:
+    - docker-compose run web pytest
+    - docker-compose down
+
+build:
+  stage: build
+  script:
+    - docker-compose build
+  artifacts:
+    paths:
+      - docker-compose.yml
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploying to production server"
+    # Здесь можно добавить команды для развертывания на вашем сервере
+    - docker-compose up -d
+    - docker-compose down -v
+
