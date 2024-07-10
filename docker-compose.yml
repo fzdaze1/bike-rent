@@ -6,6 +6,8 @@ services:
       - 127.0.0.1:8000:8000
     env_file:
       - $env
+    depends_on:
+      - db
   
   db:
     image: postgres:15
@@ -13,6 +15,11 @@ services:
       - postgres-data:/var/lib/postgresql/data
     env_file:
       - $env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis
