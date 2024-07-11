@@ -9,13 +9,13 @@
    cd bike-rent
    ``` 
 3) Создать .env файл в корневой директории проекта и указать необходимые окружения - пример в файле .env.example
-4) Выполнить команду для запуска проекта. Эта команда соберёт и запустит все контейнеры, описанные в файле
+4) Выполнить команду для запуска проекта. Эта команда соберёт и запустит все контейнеры, описанные в файле docker-compose.yml 
    ```
-   docker-compose.yml docker compose up -d --build.
+   docker compose up -d --build
    ```
 5) Выполнить команду для миграций в БД (также там заранее заложены велосипеды для примера)
    ```
-   docker compose exec web pythom manage.py migrate
+   docker compose exec web python manage.py migrate
    ```
 6) Провести тесты при желании можно с помощью pytest (файл с тестами в директории app/rental/tests.py
    ```
