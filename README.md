@@ -91,6 +91,9 @@ Authorization: Bearer < token >
 POST / api/return / <bike: id > /
 Authorization: Bearer < token >
 ```
+
+При возврате велосипеда вы получите сообщение Bike returned successfully. Mail error. Так как я использовал свою почту от google при уведомлении
+
 7) localhost/api/history / - GET для получения истории аренд пользователя - айди действия аренды, айди пользователя, айди байка и данные об аренде, включая времия и стоимость, (Headers должен включать в себя ключ Authorization со значением Bearer < token > )
 ```http
 POST / api/history /
