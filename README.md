@@ -81,12 +81,12 @@ Content-Type: application/json
 GET / api/bikes /
 Authorization: Bearer < token >
 ```
-5) localhost/api/rent/<bike_id > - POST для аренды велосипеда (Headers должен включать в себя ключ Authorization со значением Bearer < token > )
+5) localhost/api/rent/<bike_id> - POST для аренды велосипеда (Headers должен включать в себя ключ Authorization со значением Bearer < token > )
 ```http
 POST / api/rent/<bike: id > /
 Authorization: Bearer < token >
 ```
-6) localhost/api/return/<bike_id > - POST для возврата велосипеда - будет рассчитано время аренды и стоимость с условной ценой 300 руб/час (Headers должен включать в себя ключ Authorization со значением Bearer < token > )
+6) localhost/api/return/<bike_id> - POST для возврата велосипеда - будет рассчитано время аренды и стоимость с условной ценой 300 руб/час (Headers должен включать в себя ключ Authorization со значением Bearer < token > )
 ```http
 POST / api/return / <bike: id > /
 Authorization: Bearer < token >
