@@ -46,76 +46,58 @@
    python manage.py runserver
    ```
 # Ссылки для ручной проверки
-
 1) 127.0.0.1:8000/api/register/ - регистрация пользователя
+```http
+POST /api/users/register/
+Content-Type: application/json
 
-   \`\`\`http
-   POST /api/users/register/
-   Content-Type: application/json
-
-   {
-       "username": "testuser",
-       "email": "testuser@example.com",
-       "password": "testpassword"
-   }
-   \`\`\`
-
+{
+    "username": "testuser",
+    "email": "testuser@example.com",
+    "password": "testpassword"
+}
+```
 2) 127.0.0.1:8000/api/token/ - получение токена для пользователя
+```http
+POST /api/token/
+Content-Type: application/json
 
-   \`\`\`http
-   POST /api/token/
-   Content-Type: application/json
-
-   {
-       "username": "testuser",
-       "password": "testpassword"
-   }
-   \`\`\`
-
+{
+    "username": "testuser",
+    "password": "testpassword"
+}
+```
 3) 127.0.0.1:8000/api/token/refresh - для обновления токена пользователя
+```http
+POST /api/users/token/refresh/
+Content-Type: application/json
 
-   \`\`\`http
-   POST /api/users/token/refresh/
-   Content-Type: application/json
-
-   {
-       "refresh": "token",
-   }
-   \`\`\`
-
+{
+    "refresh": "token",
+}
+```
 4) 127.0.0.1:8000/api/bikes/ - GET список доступных велосипедов (отфильтрован по статусу 'available'), (Headers должен включать в себя ключ Authorization со значением Bearer <token>)
-
-   \`\`\`http
-   GET /api/bikes/
-   Authorization: Bearer <token>
-   \`\`\`
-
+```http
+GET /api/bikes/
+Authorization: Bearer <token>
+```
 5) 127.0.0.1:8000/api/rent/<bike_id> - POST для аренды велосипеда (Headers должен включать в себя ключ Authorization со значением Bearer <token>)
-
-   \`\`\`http
-   POST /api/rent/<bike:id>/
-   Authorization: Bearer <token>
-   \`\`\`
-
+```http
+POST /api/rent/<bike:id>/
+Authorization: Bearer <token>
+```
 6) 127.0.0.1:8000/api/return/<bike_id> - POST для возврата велосипеда - будет рассчитано время аренды и стоимость с условной ценой 300 руб/час (Headers должен включать в себя ключ Authorization со значением Bearer <token>)
-
-   \`\`\`http
-   POST /api/return/<bike:id>/
-   Authorization: Bearer <token>
-   \`\`\`
-
+```http
+POST /api/return/<bike:id>/
+Authorization: Bearer <token>
+```
 7) 127.0.0.1:8000/api/history/ - GET для получения истории аренд пользователя - айди действия аренды, айди пользователя, айди байка и данные об аренде, включая времия и стоимость, (Headers должен включать в себя ключ Authorization со значением Bearer <token>)
-
-   \`\`\`http
-   POST /api/history/
-   Authorization: Bearer <token>
-   \`\`\`
-
-8) [Документация SWAGGER UI](http://127.0.0.1:8000/api/docs/)
-
+```http
+POST /api/history/
+Authorization: Bearer <token>
+```
+8) [Документация SWAGGER UI](127.0.0.1:8000/api/docs/)
 ## Проект реализован с использованием Celery, Redis и PostgreSQL
-
-
 
 
 
