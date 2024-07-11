@@ -1,15 +1,14 @@
-from rest_framework import generics
-from rest_framework.views import APIView
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .serializers import UserSerializer, BikeSerializer, RentalSerializer
 from django.contrib.auth import get_user_model
 from .models import Bike, Rental
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework import status
-from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from .tasks import calculate_rental_cost
+from django.core.mail import send_mail
+from django.conf import settings
 
 
 User = get_user_model()
@@ -55,12 +54,16 @@ def bike_return(request, bike_id):
     except ObjectDoesNotExist:
         return Response({'error': 'You do not have an active rental for this bike.'}, status=400)
     calculate_rental_cost.delay(rental.id)
-    # rental.end_time = timezone.now()
-    # rental.total_cost = (
-    #     rental.end_time - rental.start_time).total_seconds() / 3600 * 300
-    # rental.save()
     bike.status = 'available'
     bike.save()
+    subject = 'Bike Rental Return Confirmation'
+    message = f'Hello {user.username},\n\nYour bike rental for bike {bike.name} has been successfully returned.'
+    from_email = settings.EMAIL_HOST_USER
+    to_email = [user.email]
+    try:
+        send_mail(subject, message, from_email, to_email)
+    except Exception as e:
+        return Response({'message': 'Bike returned successfully. Mail error'}, status=status.HTTP_200_OK)
     return Response({'message': 'Bike returned successfully.'}, status=status.HTTP_200_OK)
 
 
