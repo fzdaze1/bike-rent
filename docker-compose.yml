@@ -1,5 +1,3 @@
-name: bike-rent
-
 services:
   web:
     build: ./app
@@ -7,18 +5,20 @@ services:
     ports:
       - 127.0.0.1:8000:8000
     env_file:
-      - $env
+      - .env
+    depends_on:
+      - db
   
   db:
     image: postgres:15
     volumes:
       - postgres-data:/var/lib/postgresql/data
     env_file:
-      - $env
+      - .env
     environment:
-      - POSTGRES_USER=${SQL_USER}
-      - POSTGRES_PASSWORD=${SQL_PASSWORD}
-      - POSTGRES_DB=${SQL_DATABASE}
+      POSTGRES_USER: ${SQL_USER}
+      POSTGRES_PASSWORD: ${SQL_PASSWORD}
+      POSTGRES_DB: ${SQL_DATABASE}
 
   redis:
     image: redis
@@ -27,14 +27,14 @@ services:
     volumes:
       - redis-data:/data
     env_file:
-      - $env
+      - .env
 
   celery:
     image: celery
     build: ./app
     command: celery -A rental worker -l info
     env_file:
-      - $env
+      - .env
     volumes:
       - ./app:/app
     depends_on:
